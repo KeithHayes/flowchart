@@ -1,27 +1,65 @@
 st=>start: Start AlignmentProcessor
-op1=>operation: Initialize with min_match_ratio, min_context_length
+
+op1=>operation: Initialize AlignmentProcessor
+(min_match_ratio, min_context_length)
+Compile sentence splitter regex
+
 sub1=>subroutine: _capitalize_first(text)
+→ Return text[0].upper() + text[1:] if text else text
+
 sub2=>subroutine: validate_sentences(text)
+→ Split text by punctuation
+→ For each sentence:
+  • Check min word count
+  • Check ending punctuation
+  • Check starting capitalization
+
 op2=>operation: extract_new_content(combined, context)
-cond1=>condition: Is context empty or too short?
-op3=>operation: Capitalize combined text
-op4=>operation: Create SequenceMatcher (context.lower, combined.lower)
-op5=>operation: Find longest match
-cond2=>condition: Is match size < min_match_ratio * len(context)?
-op6=>operation: Capitalize combined text
-op7=>operation: Return combined text after match
+
+cond1=>condition: Is context empty OR len(context) < min_context_length?
+
+op3=>operation: Return _capitalize_first(combined)
+
+op4=>operation: Create SequenceMatcher
+with context.lower(), combined.lower()
+
+op5=>operation: Find longest matching block
+
+cond2=>condition: Is match.size < min_match_ratio × len(context)?
+
+op6=>operation: Return _capitalize_first(combined)
+
+op7=>operation: Return combined[match.b + match.size:].lstrip()
+
 op8=>operation: get_tail_for_context(text, target_length)
-cond3=>condition: Is text empty or target_length <= 0?
-op9=>operation: Return empty string
-op10=>operation: Split text into sentences
-op11=>operation: Initialize tail and current_length
-loop1=>operation: Iterate sentences in reverse
+
+cond3=>condition: Is text empty OR target_length <= 0?
+
+op9=>operation: Return ""
+
+op10=>operation: Split text into sentences by [.?!]
+
+op11=>operation: Initialize:
+• tail = []
+• current_length = 0
+
+loop1=>operation: For each sentence in reverse
+
 cond4=>condition: Is sentence empty?
-cond5=>condition: current_length + len(sentence) > target_length AND tail is not empty?
+
+cond5=>condition: Does sentence exceed target_length AND tail is not empty?
+
 op12=>operation: Break loop
+
 op13=>operation: Insert sentence at beginning of tail
-op14=>operation: Update current_length
-op15=>operation: Join tail sentences and return
+
+op14=>operation: Increment current_length += len(sentence) + 1
+
+op15=>operation: Return ' '.join(tail)
+
+e_extract=>end: End extract_new_content
+
+e_get_tail=>end: End get_tail_for_context
 
 st->op1
 op1->op2
@@ -31,25 +69,16 @@ op1->sub2
 
 op2->cond1
 cond1(yes)->op3->e_extract
-cond1(no)->op4
-op4->op5
-op5->cond2
+cond1(no)->op4->op5->cond2
 cond2(yes)->op6->e_extract
 cond2(no)->op7->e_extract
 
 op8->cond3
 cond3(yes)->op9->e_get_tail
-cond3(no)->op10
-op10->op11
-op11->loop1
+cond3(no)->op10->op11->loop1
 loop1->cond4
 cond4(yes)->loop1
 cond4(no)->cond5
 cond5(yes)->op12->e_get_tail
-cond5(no)->op13
-op13->op14
-op14->loop1
+cond5(no)->op13->op14->loop1
 loop1->op15->e_get_tail
-
-e_extract=>end: End extract_new_content
-e_get_tail=>end: End get_tail_for_context
