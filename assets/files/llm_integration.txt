@@ -1,0 +1,44 @@
+st=>start: Start MyLLMClient.generate(prompt)
+
+op1=>operation: Prepare payload
+• prompt
+• max_tokens = 2000
+• temperature = 0.7
+• stop = ["\\n\\n"]
+• top_p = 0.9
+• frequency_penalty = 0.5
+• presence_penalty = 0.5
+
+op2=>operation: Open aiohttp ClientSession (timeout = 120s)
+
+op3=>operation: Send POST to self.api_url with payload
+
+cond1=>condition: response.status == 200?
+
+cond1(no)->op4=>operation: Read error message
+• Log: LLM API error
+• Raise ValueError("API returned {status}")
+
+cond1(yes)->op5=>operation: Parse response JSON
+→ data["choices"][0]["text"]
+
+cond2=>condition: Is result empty?
+
+cond2(yes)->op6=>operation: Raise ValueError("Empty response")
+
+cond2(no)->op7=>operation: Return stripped result
+
+ex=>operation: Exception?
+→ Log error
+→ Raise ValueError with error details
+
+e=>end: End generate()
+
+st->op1->op2->op3->cond1
+cond1(no)->op4->e
+cond1(yes)->op5->cond2
+cond2(yes)->op6->e
+cond2(no)->op7->e
+
+op3->ex
+op5->ex
