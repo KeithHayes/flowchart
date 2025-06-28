@@ -1,51 +1,33 @@
-st=>start: Start split_text(text)
-
-cond0=>condition: chunk_overlap > chunk_size?
-
-cond0(yes)->op0=>operation: Raise ValueError
-cond0(no)->op1=>operation: Split text by self._separator
-→ list of lines
-
-cond1=>condition: keep_separator == True?
-
-cond1(yes)->op2=>operation: Add separator to all but last line
-cond1(no)->op2b=>operation: Leave lines as-is
-
-op3=>operation: Initialize:
-• chunks = []
-• current_chunk = []
-• current_length = 0
-
-op_loop=>operation: For each line in lines
-
-cond2=>condition: Will line + current_chunk exceed chunk_size?
-
-cond2(yes)->op4=>operation: Append current_chunk to chunks
-
-op5=>operation: Build overlap_buffer from end of current_chunk
-• Until overlap size is reached
-
-op6=>operation: Set current_chunk = overlap_buffer
-• Reset current_length = overlap_length
-
-cond2(no)->op7=>operation: Add line to current_chunk
-→ Update current_length
-
-cond_end=>condition: More lines?
-
-cond_end(yes)->op_loop
-cond_end(no)->op8=>operation: Append remaining current_chunk to chunks
-
-e=>end: Return chunks
-
-st->cond0
-cond0(no)->op1->cond1
-cond1(yes)->op2->op3
-cond1(no)->op2b->op3
-
-op3->op_loop->cond2
-cond2(yes)->op4->op5->op6->op7
-cond2(no)->op7
-op7->cond_end
-cond_end(yes)->op_loop
-cond_end(no)->op8->e
+flowchart TD
+    A[Start] --> B["Initialize LineAwareTextSplitter"]
+    B --> C["Parameters:\n- chunk_size\n- chunk_overlap\n- separator\n- keep_separator\n- length_function"]
+    C --> D["Set secondary_separators:\n['\\n\\n', '. ', '! ', '? ']"]
+    
+    D --> E["split_text(text)"]
+    E --> F{chunk_overlap > chunk_size?}
+    F -->|Yes| G[Throw ValueError]
+    F -->|No| H["Split text by main separator"]
+    H --> I["Keep separator?"]
+    I -->|Yes| J["Add separator to each line except last"]
+    I -->|No| K["Keep lines as split"]
+    
+    J --> L[Initialize empty chunks]
+    K --> L
+    L --> M[Process each line]
+    
+    M --> N{Current chunk + line > chunk_size?}
+    N -->|Yes| O["Finalize current chunk"]
+    O --> P["Build overlap buffer from end of chunk"]
+    P --> Q["Set new chunk = overlap buffer"]
+    Q --> R["Add line to current chunk"]
+    
+    N -->|No| R
+    R --> S{More lines?}
+    S -->|Yes| M
+    S -->|No| T["Add final chunk if not empty"]
+    T --> U[Return all chunks]
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style B fill:#e4d2ba,stroke:#523a28
+    style G fill:#ffcccc,stroke:#ff0000
+    style U fill:#d4edda,stroke:#28a745

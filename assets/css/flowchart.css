@@ -4,52 +4,53 @@ body {
     background-color: #ffdba9;
     color: #7e5c43;
 }
-#diagram {
+
+#diagram-container {
     width: 100%;
     border: 1px solid #523a28;
     margin-top: 20px;
     background-color: #ffdba9;
-    overflow: visible;
-    min-height: 100px; /* Minimum height */
-    padding: 10px; /* Added padding around the diagram */
+    min-height: 100px;
+    padding: 10px;
+    overflow: auto;
 }
+
 .container {
     max-width: 900px;
     margin: 0 auto;
-    overflow: visible;
-}
-textarea {
-    width: 100%;
-    height: 200px;
-    font-family: monospace;
-    background-color: #ede1d1;
-    color: #7e5c43;
-    border: 1px solid #523a28;
-}
-button {
-    padding: 8px 16px;
-    background-color: #523a28;
-    color: #e4d2ba;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-}
-button:hover {
-    background-color: #7e5c43;
 }
 
-.flowchart path, .flowchart polygon {
-    stroke: #523a28 !important;
-    fill: #523a28 !important;
-}
-.flowchart rect {
+/* Mermaid-specific styles */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon {
     stroke: #523a28 !important;
     fill: #e4d2ba !important;
 }
-.flowchart text {
-    fill: #7e5c43 !important;
+
+.mermaid .edgePath path {
+    stroke: #523a28 !important;
 }
 
-#diagram svg {
-    display: block;
+.mermaid .label {
+    color: #7e5c43 !important;
+    font-family: Arial !important;
+}
+
+.mermaid .cluster rect {
+    fill: #ede1d1 !important;
+}
+
+#model-select {
+    padding: 8px 12px;
+    background-color: #ede1d1;
+    color: #7e5c43;
+    border: 1px solid #523a28;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+#model-select:focus {
+    outline: none;
+    border-color: #7e5c43;
 }

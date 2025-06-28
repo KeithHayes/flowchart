@@ -1,131 +1,92 @@
-function drawFlowchart(code) {
-    if (!code || code.trim() === '') {
-        document.getElementById('diagram').innerHTML = 
-            '<div style="color: orange;">Warning: Empty flowchart code</div>'
-        return
-    }
-
-    if (typeof flowchart === 'undefined') {
-        document.getElementById('diagram').innerHTML = 
-            '<div style="color: red;">Error: Flowchart library not loaded</div>'
-        return
-    }
-
-    const diagram = document.getElementById('diagram')
-    diagram.innerHTML = ''
-    
-    try {
-        const chart = flowchart.parse(code)
-        chart.drawSVG('diagram', {
-            'x': 10,
-            'y': 10,
-            'line-width': 2,
-            'line-length': 50,
-            'text-margin': 10,
-            'font-size': 14,
-            'font': 'normal',
-            'font-family': 'Arial',
-            'font-weight': 'normal',
-            'font-color': '#7e5c43',
-            'line-color': '#523a28',
-            'element-color': '#523a28',
-            'fill': '#e4d2ba',
-            'yes-text': 'yes',
-            'no-text': 'no',
-            'arrow-end': 'block',
-            'scale': 1,
-            'symbols': {
-                'start': {
-                    'font-color': '#7e5c43',
-                    'element-color': '#523a28',
-                    'fill': '#e4d2ba'
-                },
-                'end': {
-                    'font-color': '#7e5c43',
-                    'element-color': '#523a28',
-                    'fill': '#e4d2ba'
-                }
-            }
-        })
-
-        const svg = diagram.querySelector('svg')
-        if (svg) {
-            const bbox = svg.getBBox()
-            diagram.style.width = '100%'
-            diagram.style.minHeight = (bbox.height + 100) + 'px'
-            svg.style.maxWidth = '100%'
-            svg.style.height = 'auto'
+// Initialize Mermaid with configuration
+const initMermaid = () => {
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: {
+            primaryColor: '#e4d2ba',
+            primaryBorderColor: '#523a28',
+            primaryTextColor: '#7e5c43',
+            lineColor: '#523a28',
+            arrowheadColor: '#523a28',
+            fontSize: '14px'
         }
+    })
+}
+
+// Draw flowchart with proper error handling
+const drawFlowchart = (code) => {
+    const container = document.getElementById('diagram-container')
+    
+    if (!code || code.trim() === '') {
+        container.innerHTML = '<div style="color: orange;">Warning: Empty flowchart code</div>'
+        return
+    }
+
+    try {
+        container.innerHTML = `<div class="mermaid">${code}</div>`
+        mermaid.init(undefined, container.querySelector('.mermaid'))
     } catch (err) {
         console.error('Flowchart error:', err)
-        diagram.innerHTML = '<div style="color: red;">Error: ' + 
-            (err.message || 'Invalid flowchart syntax') + '</div>'
+        container.innerHTML = `<div style="color: red;">Error: ${err.message || 'Invalid syntax'}</div>`
     }
 }
 
-async function loadModel(file) {
+// Load model file with fetch
+const loadModel = async (file) => {
     try {
         const response = await fetch(`assets/files/${file}`)
         if (!response.ok) throw new Error(`File not found: ${file}`)
-        const content = await response.text()
-        if (!content.trim()) throw new Error('File is empty')
-        return content
+        return await response.text()
     } catch (error) {
         console.error('Load error:', error)
-        document.getElementById('diagram').innerHTML = 
+        document.getElementById('diagram-container').innerHTML = 
             `<div style="color: red;">Error: ${error.message}</div>`
         return null
     }
 }
 
-function populateModelSelect() {
+// Populate dropdown with available files
+const populateModelSelect = () => {
     const select = document.getElementById('model-select')
     select.innerHTML = ''
     
-    if (!availableFiles || availableFiles.length === 0) {
-        const option = document.createElement('option')
-        option.textContent = 'No models found'
-        option.disabled = true
-        select.appendChild(option)
+    if (!availableFiles || !availableFiles.length) {
+        select.innerHTML = '<option disabled>No models found</option>'
         return
     }
     
-    availableFiles.forEach(filename => {
-        const option = document.createElement('option')
-        option.value = filename
-        option.textContent = filename.replace('.txt', '')
-        select.appendChild(option)
+    availableFiles.forEach((file, index) => {
+        const option = new Option(file.replace('.txt', ''), file)
+        if (index === 0) option.selected = true
+        select.add(option)
     })
     
-    // Load first file by default
-    if (availableFiles.length > 0) {
-        loadSelectedModel()
-    }
+    // Trigger initial load
+    if (availableFiles.length) loadSelectedModel()
 }
 
-async function loadSelectedModel() {
-    const modelSelect = document.getElementById('model-select')
-    const codeTextarea = document.getElementById('code')
+// Handle model selection
+const loadSelectedModel = async () => {
+    const selectedFile = document.getElementById('model-select').value
+    if (!selectedFile) return
     
-    if (!modelSelect.value) return
-    
-    const model = await loadModel(modelSelect.value)
+    const model = await loadModel(selectedFile)
     if (model) {
-        codeTextarea.value = model
+        document.getElementById('code').value = model
         drawFlowchart(model)
     }
 }
 
-// Wait for all resources to load
-window.addEventListener('load', () => {
-    if (typeof Raphael === 'undefined' || typeof flowchart === 'undefined') {
-        document.getElementById('diagram').innerHTML = 
-            '<div style="color: red;">Error: Required libraries not loaded</div>'
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof mermaid === 'undefined') {
+        document.getElementById('diagram-container').innerHTML = 
+            '<div style="color: red;">Error: Mermaid not loaded</div>'
         return
     }
 
+    initMermaid()
     populateModelSelect()
-    
-    document.getElementById('model-select')
-        .addEventListener('change', loadSelectedModel)
+    document.getElementById('model-select').addEventListener('change', loadSelectedModel)
 })

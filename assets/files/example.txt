@@ -1,13 +1,7 @@
-st=>start: Start
-e=>end: End
-op1=>operation: Prepare Data
-op2=>operation: Process A
-op3=>operation: Process B
-cond=>condition: Ready?
-para=>parallel: Parallel Tasks|future
-
-st->op1->cond
-cond(yes)->para
-para(path1, right)->op2->e
-para(path2, left)->op3->e
-cond(no)->e
+flowchart TD
+    st([Start]) --> op1[Prepare Data]
+    op1 --> cond{Ready?}
+    cond -->|yes| para
+    para --> op2[Process A] --> e([End])
+    para --> op3[Process B] --> e
+    cond -->|no| e
