@@ -1,0 +1,28 @@
+flowchart TD
+    A([MyLLMClient]) --> B[Constructor]
+    B --> C["Set API URL\n(Default: http://0.0.0.0:5000/v1/completions)"]
+    B --> D["Set timeout (120s)"]
+    
+    A --> E[generate method]
+    
+    subgraph generate_flow
+        E --> F["Prepare payload with:\n- prompt\n- max_tokens\n- temperature\n- stop sequences\n- top_p\n- penalties"]
+        F --> G["Create ClientSession"]
+        G --> H["POST request to API"]
+        H --> I{Success?}
+        I -->|200 OK| J["Extract response text"]
+        I -->|Error| K["Log error details"]
+        J --> L{Valid result?}
+        L -->|Yes| M[Return formatted text]
+        L -->|No| N["Raise ValueError"]
+        K --> N
+        N --> O[Propagate error]
+    end
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style B fill:#e4d2ba,stroke:#523a28
+    style C,D fill:#d4edda,stroke:#28a745
+    style E fill:#ffe8cc,stroke:#ffa94d
+    style F,H,J,M fill:#e4d2ba,stroke:#523a28
+    style K,N fill:#ffcccc,stroke:#ff0000
+    style I,L diamond,fill:#ffe8cc,stroke:#ffa94d

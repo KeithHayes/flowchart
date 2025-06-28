@@ -9,7 +9,9 @@ const initMermaid = () => {
             primaryTextColor: '#7e5c43',
             lineColor: '#523a28',
             arrowheadColor: '#523a28',
-            fontSize: '14px'
+            fontSize: '14px',
+            edgeLabelBackground: '#ffdba9',
+            edgeLabelColor: '#7e5c43'
         }
     })
 }

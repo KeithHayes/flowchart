@@ -1,0 +1,36 @@
+flowchart TD
+    A([AlignmentProcessor]) --> B[extract_new_content]
+    A --> C[get_tail_for_context]
+    A --> D[validate_sentences]
+    A --> E[_capitalize_first]
+    
+    subgraph extract_new_content
+        B --> F{Has sufficient context?}
+        F -->|No| G[Return capitalized input]
+        F -->|Yes| H[Find longest match]
+        H --> I{Match ratio >= threshold?}
+        I -->|No| G
+        I -->|Yes| J[Return new content portion]
+    end
+    
+    subgraph get_tail_for_context
+        C --> K{Split into sentences}
+        K --> L[Reverse sentences]
+        L --> M[Build tail until target length]
+        M --> N[Return joined tail]
+    end
+    
+    subgraph validate_sentences
+        D --> O{Split into sentences}
+        O --> P[Check each sentence]
+        P --> Q{Valid length,\npunctuation,\ncapitalization?}
+        Q -->|No| R[Record error]
+        Q -->|Yes| S[Continue]
+        P --> T[Return error list]
+    end
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style B,C,D,E fill:#e4d2ba,stroke:#523a28
+    style G,J,N fill:#d4edda,stroke:#28a745
+    style R fill:#ffcccc,stroke:#ff0000
+    style F,I,Q diamond,fill:#ffe8cc,stroke:#ffa94d

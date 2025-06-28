@@ -1,0 +1,30 @@
+flowchart TD
+    A([ContextAwareFormatter]) --> B[Constructor]
+    B --> C["Initialize LLM, logging, retry settings"]
+    B --> D["Set default format instructions"]
+    B --> E[_initialize_prompts]
+    B --> F[_initialize_chains]
+    
+    subgraph _initialize_prompts
+        E --> G["Create format_prompt template"]
+        G --> H["Define input variables:\n- context\n- new_content\n- format_instructions"]
+    end
+    
+    subgraph _initialize_chains
+        F --> I["Create LLMChain with format_prompt"]
+        I --> J["Configure with LLM instance"]
+    end
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style B fill:#e4d2ba,stroke:#523a28
+    style C,D fill:#d4edda,stroke:#28a745
+    style E,F fill:#ffe8cc,stroke:#ffa94d
+    style G,H,I,J fill:#e4d2ba,stroke:#523a28
+
+    classDef main fill:#e4d2ba,stroke:#523a28
+    classDef config fill:#d4edda,stroke:#28a745
+    classDef init fill:#ffe8cc,stroke:#ffa94d
+    
+    class A,B,G,H,I,J main
+    class C,D config
+    class E,F init

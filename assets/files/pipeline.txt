@@ -1,0 +1,27 @@
+flowchart TD
+    A([Start]) --> B[Initialize Pipeline]
+    B --> C[Read Input File]
+    C --> D[Clean Text]
+    D --> E[Chunk Text]
+    E --> F[Process Chunks]
+    
+    subgraph Chunk Processing
+        F --> G[Combine with Previous Tail]
+        G --> H[Send to LLM Formatter]
+        H --> I{API Success?}
+        I -->|Yes| J[Extract New Content]
+        I -->|No| K[Keep Original Chunk]
+        J --> L[Store Formatted Part]
+        L --> M[Update Context Tail]
+        K --> M
+    end
+    
+    F --> N[Combine All Parts]
+    N --> O[Post-Processing]
+    O --> P[Save Output File]
+    P --> Q([End])
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style Q fill:#e4d2ba,stroke:#523a28
+    style H fill:#d4edda,stroke:#28a745
+    style I diamond,fill:#ffe8cc,stroke:#ffa94d

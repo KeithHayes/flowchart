@@ -1,0 +1,14 @@
+flowchart TD
+    A([Start]) --> B[Configure Logging]
+    B --> C["Initialize TextProcessingPipeline<br>CHUNK_SIZE=#{CHUNK_SIZE}<br>CHUNK_OVERLAP=#{CHUNK_OVERLAP}"]
+    C --> D["Call pipeline.process_file()"]
+    D --> E{Success?}
+    E -->|Yes| F([End])
+    E -->|No| G[Log Error]
+    G --> H[Raise Exception]
+    
+    style A fill:#e4d2ba,stroke:#523a28
+    style F fill:#e4d2ba,stroke:#523a28
+    style H fill:#ffcccc,stroke:#ff0000
+    style D fill:#d4edda,stroke:#28a745
+    style E diamond,fill:#ffe8cc,stroke:#ffa94d
